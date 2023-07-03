@@ -14,14 +14,13 @@ const int ITI = 10000; // 10 sekunder mellan trials
 const int duration = 4000; // 4 sekunder vibration
 const int US = 2000; // 2 sekunders US 
 const int ISI = 7000; // 2 sekunders inter stimuli interval 
-
-int a=0;
  
 const int antalTrial = 10;    
 int currentTrial = 0 ;  
 
 bool isTrialStarted = false;
 bool isElektricitetActivated = false;
+bool hasShutVib = false; 
 
 void printEvent(const char* eventName) {
   Serial.print(currentTime);
@@ -56,15 +55,16 @@ void endTrial() {
     digitalWrite(elektricitet, LOW);
     startTime = currentTime;
     currentTrial++;
-    a=0;
+   
   }
 }
 void shutVib() {
-  
-       printEvent("CS off");
-      digitalWrite(vibration, LOW);
-    
+  if (!hasShutVib) {
+    hasShutVib = true;
+    printEvent("CS off");
+    digitalWrite(vibration, LOW);
   }
+}
 void setup() {
   Serial.begin(9600);
   Serial.println();
@@ -100,10 +100,10 @@ void loop() {
     if (currentTime > (startTime + ITI)) {
       startTrial();
     }
-    if (currentTime > (startTime + ITI +duration) && (a==0)) {
+    if (currentTime > (startTime + ITI +duration) ) {
        
       shutVib() ;
-      a++;
+      
     }
   
     if (currentTime > (startTime + ITI + ISI  + duration)) {
