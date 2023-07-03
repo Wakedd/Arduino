@@ -35,7 +35,6 @@ void loop() {
   
     startTime = millis();
     digitalWrite(vibration, HIGH); 
-    Serial.println ("****");
     delay (2000);
     currentTime = millis(); 
 
@@ -44,8 +43,7 @@ void loop() {
      //elstöt
     digitalWrite(elektricitet, HIGH);
     delay(2000);
-    Serial.println ("  **");
-     currentTime = millis(); 
+   currentTime = millis(); 
     }
     if (currentTime-startTime >=4) {
       digitalWrite(vibration, LOW);
