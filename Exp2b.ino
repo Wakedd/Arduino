@@ -10,10 +10,12 @@ unsigned long vibrationStart=0;
 const int vibration = 9;    
 const int elektricitet  = 10;       
 
-const int ITI = 10000; // 10 sekunder mellan trials 
+ int ITI = 10000; // 10 sekunder mellan trials 
 const int duration = 4000; // 4 sekunder vibration
 const int US = 2000; // 2 sekunders US 
 const int ISI = 7000; // 2 sekunders inter stimuli interval 
+const int remainingITI = ITI - ISI - US ; 
+
  
 const int antalTrial = 10;    
 int currentTrial = 0 ;  
@@ -53,6 +55,7 @@ void endTrial() {
     isElektricitetActivated = false;
     printEvent("US off");
     digitalWrite(elektricitet, LOW);
+    ITI = remainingITI ; 
     startTime = currentTime;
     currentTrial++;
    
@@ -100,7 +103,7 @@ void loop() {
     if (currentTime > (startTime + ITI)) {
       startTrial();
     }
-    if (currentTime > (startTime + ITI +duration) ) {
+    if (currentTime > (startTime + ITI + duration) ) {
        
       shutVib() ;
       
