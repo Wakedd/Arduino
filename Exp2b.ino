@@ -5,6 +5,7 @@ static int spinnerIndex = 0;  // Current index of the spinner character
 
 unsigned long startTime = 0; 
 unsigned long currentTime = 0; 
+unsigned long vibrationStart=0; 
 
 const int vibration = 9;    
 const int elektricitet  = 10;       
@@ -14,7 +15,8 @@ const int duration = 4000; // 4 sekunder vibration
 const int US = 2000; // 2 sekunders US 
 const int ISI = 7000; // 2 sekunders inter stimuli interval 
 
-
+int a=0;
+ 
 const int antalTrial = 10;    
 int currentTrial = 0 ;  
 
@@ -34,14 +36,13 @@ void startTrial() {
     isTrialStarted = true;
     printEvent("CS on");
     digitalWrite(vibration, HIGH);
+    vibrationStart =millis(); 
   }
 }
 
 void activateElektricitet() {
   if (isTrialStarted && !isElektricitetActivated) {
     isElektricitetActivated = true;
-     printEvent("CS off");
-    digitalWrite(vibration, LOW);
     printEvent("US on");
     digitalWrite(elektricitet, HIGH);
   }
@@ -55,9 +56,15 @@ void endTrial() {
     digitalWrite(elektricitet, LOW);
     startTime = currentTime;
     currentTrial++;
+    a=0;
   }
 }
-
+void shutVib() {
+  
+       printEvent("CS off");
+      digitalWrite(vibration, LOW);
+    
+  }
 void setup() {
   Serial.begin(9600);
   Serial.println();
@@ -93,12 +100,17 @@ void loop() {
     if (currentTime > (startTime + ITI)) {
       startTrial();
     }
-
-    if (currentTime > (startTime + ITI + ISI)) {
+    if (currentTime > (startTime + ITI +duration) && (a==0)) {
+       
+      shutVib() ;
+      a++;
+    }
+  
+    if (currentTime > (startTime + ITI + ISI  + duration)) {
       activateElektricitet();
     }
 
-    if (currentTime > (startTime + ITI + ISI + US)) {
+    if (currentTime > (startTime + ITI + ISI + US  +duration )) {
       endTrial();
     }
     
