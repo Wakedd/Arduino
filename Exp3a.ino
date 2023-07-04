@@ -3,21 +3,22 @@
 static const char spinner[] = "-\\|/";  // Array of ASCII spinning characters
 static int spinnerIndex = 0;  // Current index of the spinner character
 
-unsigned long startTime = 0;
-unsigned long currentTime = 0;
+unsigned long startTime = 0; 
+unsigned long currentTime = 0; 
 
-const int vibration = 9;
-const int elektricitet = 10;
+int ITI[] = {8, 12, 16, 20, 24, 28, 32};
+int numITIValues = sizeof(ITI) / sizeof(ITI[0]); // Number of ITI values in the array
 
-const int ITIValues[] = {8, 12, 16, 20, 24, 28, 32}; // Array of ITI durations (in seconds)
-const int numITIValues = sizeof(ITIValues) / sizeof(ITIValues[0]); // Number of ITI values in the array
+const int vibration = 9;    
+const int elektricitet  = 10;       
 
-const int duration = 4000; // 4 seconds vibration
-const int US = 2000; // 2 seconds US
-const int ISI = 2000; // 2 seconds inter-stimuli interval
+const int duration = 4000; // 4 sekunder vibration
+const int US = 2000; // 2 sekunders US 
+const int ISI = 2000; // 2 sekunders inter stimuli interval 
 
-const int antalTrial = 10;
-int currentTrial = 0;
+
+const int antalTrial = 10;    
+int currentTrial = 0 ;  
 
 bool isTrialStarted = false;
 bool isElektricitetActivated = false;
@@ -32,7 +33,10 @@ void printEvent(const char* eventName) {
 
 void startTrial() {
   if (!isTrialStarted) {
-    isTrialStarted = true;
+     isTrialStarted = true;
+     
+     int randomIndex = random(numITIValues); // Generate a random index for ITI array
+    int randomITI = ITI[randomIndex] * 1000; // Convert to milliseconds
     printEvent("CS on");
     digitalWrite(vibration, HIGH);
   }
@@ -54,6 +58,7 @@ void endTrial() {
     printEvent("US off");
     digitalWrite(vibration, LOW);
     digitalWrite(elektricitet, LOW);
+    startTime = currentTime;
     currentTrial++;
   }
 }
@@ -79,33 +84,29 @@ void setup() {
   Serial.print("Event");
   Serial.print("\t");
   Serial.println("Trial");
+  startTime = millis();
+  currentTime = millis();
+  printEvent("start");
 
-  currentTime = millis(); // Set initial current time
-  randomSeed(analogRead(0)); // Seed the random number generator with an analog pin reading
 }
 
 void loop() {
   currentTime = millis();
 
-  if (currentTrial < antalTrial) {
-    if (!isTrialStarted) {
-      int randomIndex = random(numITIValues); // Generate a random index for ITI array
-      int randomITI = ITIValues[randomIndex] * 1000; // Convert to milliseconds
-      startTime = currentTime + randomITI;
-      isTrialStarted = true; // Set the trial flag to true
-    }
+  if(currentTrial < antalTrial){
 
-    if (isTrialStarted && currentTime > startTime) {
+    if (currentTime > (startTime + ITI)) {
       startTrial();
     }
 
-    if (isTrialStarted && currentTime > (startTime + ISI)) {
+    if (currentTime > (startTime + ITI + ISI)) {
       activateElektricitet();
     }
 
-    if (isTrialStarted && currentTime > (startTime + ISI + US)) {
+    if (currentTime > (startTime + ITI + ISI + US)) {
       endTrial();
-      isTrialStarted = false; // Reset the trial flag to false
     }
+    
   }
+
 }
