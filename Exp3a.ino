@@ -92,19 +92,20 @@ void loop() {
       int randomIndex = random(numITIValues); // Generate a random index for ITI array
       int randomITI = ITIValues[randomIndex] * 1000; // Convert to milliseconds
       startTime = currentTime + randomITI;
+      isTrialStarted = true; // Set the trial flag to true
     }
 
-    if (currentTime > startTime) {
+    if (isTrialStarted && currentTime > startTime) {
       startTrial();
     }
 
-    if (currentTime > (startTime + ISI)) {
+    if (isTrialStarted && currentTime > (startTime + ISI)) {
       activateElektricitet();
     }
 
-    if (currentTime > (startTime + ISI + US)) {
+    if (isTrialStarted && currentTime > (startTime + ISI + US)) {
       endTrial();
-      startTime = currentTime; // Reset the start time
+      isTrialStarted = false; // Reset the trial flag to false
     }
   }
 }
