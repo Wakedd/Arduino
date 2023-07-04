@@ -5,23 +5,26 @@ static int spinnerIndex = 0;  // Current index of the spinner character
 
 unsigned long startTime = 0; 
 unsigned long currentTime = 0; 
-
-int ITI[] = {8, 12, 16, 20, 24, 28, 32};
-int numITIValues = sizeof(ITI) / sizeof(ITI[0]); // Number of ITI values in the array
+unsigned long vibrationStart=0; 
 
 const int vibration = 9;    
 const int elektricitet  = 10;       
 
+int ITI[] = {8, 12, 16, 20, 24, 28, 32};
+int numITIValues = sizeof(ITI) / sizeof(ITI[0]); // Number of ITI values in the array
+
 const int duration = 4000; // 4 sekunder vibration
 const int US = 2000; // 2 sekunders US 
-const int ISI = 2000; // 2 sekunders inter stimuli interval 
+const int CS= 2000; // 2 sekudner CS 
+//int remainingITI = ITI - ISI - US ; 
 
-
+ 
 const int antalTrial = 10;    
 int currentTrial = 0 ;  
 
 bool isTrialStarted = false;
 bool isElektricitetActivated = false;
+bool hasShutVib = false; 
 
 void printEvent(const char* eventName) {
   Serial.print(currentTime);
@@ -33,12 +36,10 @@ void printEvent(const char* eventName) {
 
 void startTrial() {
   if (!isTrialStarted) {
-     isTrialStarted = true;
-     
-     int randomIndex = random(numITIValues); // Generate a random index for ITI array
-    int randomITI = ITI[randomIndex] * 1000; // Convert to milliseconds
+    isTrialStarted = true;
     printEvent("CS on");
     digitalWrite(vibration, HIGH);
+    vibrationStart =millis(); 
   }
 }
 
@@ -54,15 +55,26 @@ void endTrial() {
   if (isTrialStarted) {
     isTrialStarted = false;
     isElektricitetActivated = false;
-    printEvent("CS off");
     printEvent("US off");
-    digitalWrite(vibration, LOW);
     digitalWrite(elektricitet, LOW);
+   // ITI = remainingITI ; 
     startTime = currentTime;
-    currentTrial++;
+    currentTrial++; 
+    int randomIndex = random(numITIValues); // Generate a random index for ITI array
+    int randomITI = ITI[randomIndex] * 1000; // Convert to milliseconds
+   
   }
 }
+void shutVib() {
+  if (!hasShutVib) {
+    hasShutVib = true;
+    printEvent("CS off");
+    digitalWrite(vibration, LOW);
+    int randomIndex = random(numITIValues); // Generate a random index for ITI array
+    int randomITI = ITI[randomIndex] * 1000; // Convert to milliseconds
 
+  }
+}
 void setup() {
   Serial.begin(9600);
   Serial.println();
@@ -98,15 +110,20 @@ void loop() {
     if (currentTime > (startTime + ITI)) {
       startTrial();
     }
-
-    if (currentTime > (startTime + ITI + ISI)) {
+    
+    if (currentTime > (startTime + ITI + duration ) ) {
+       
+      shutVib() ;
+      
+    }
+  
+  }
+  if (currentTrial < antalTrial)
+  if (currentTime > (startTime + ITI + duration)){
       activateElektricitet();
     }
-
-    if (currentTime > (startTime + ITI + ISI + US)) {
+    if (currentTime > startTime + ITI + duration + US){
       endTrial();
     }
-    
-  }
 
 }
