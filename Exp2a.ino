@@ -1,5 +1,4 @@
 //test program
-
 static const char spinner[] = "-\\|/";  // Array of ASCII spinning characters
 static int spinnerIndex = 0;  // Current index of the spinner character
 
@@ -61,11 +60,10 @@ void endTrial() {
 void setup() {
   Serial.begin(9600);
   Serial.println();
-  Serial.println("Please send a character to start the sketch");
-  while (Serial.available() == 0) {
-    Serial.print(spinner[spinnerIndex]);  // Print the spinner character
-    spinnerIndex = (spinnerIndex + 1) % sizeof(spinner);  // Update the spinner index
-    delay(100);  // Delay between each spinner character update
+  
+while (Serial.available() == 0) {
+    
+    
   }
   while (Serial.available() > 0) {
     Serial.read(); // Empty the read buffer
@@ -73,7 +71,8 @@ void setup() {
 
   pinMode(vibration, OUTPUT);
   pinMode(elektricitet, OUTPUT);
-  Serial.println("");
+   Serial.print("Frame");
+  Serial.print("\t");
   Serial.print("Time");
   Serial.print("\t");
   Serial.print("Event");
@@ -86,6 +85,8 @@ void setup() {
 }
 
 void loop() {
+
+  
   currentTime = millis();
 
   if(currentTrial < antalTrial){
@@ -103,5 +104,4 @@ void loop() {
     }
     
   }
-
 }
