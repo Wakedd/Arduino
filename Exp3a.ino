@@ -86,9 +86,7 @@ void setup() {
 
   // Wait for input before starting the sketch
   while (Serial.available() == 0) {
-    Serial.print(spinner[spinnerIndex]);  // Print the spinner character
-    spinnerIndex = (spinnerIndex + 1) % sizeof(spinner);  // Update the spinner index
-    delay(100);  // Delay between each spinner character update
+    
   }
 
   // Empty the read buffer
