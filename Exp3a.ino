@@ -1,129 +1,149 @@
-//test program
+// Pavlovian Conditioning Protocol
+// Exp3a Hennessey et al. (1979) - Classical conditioning in paramecia
 
 static const char spinner[] = "-\\|/";  // Array of ASCII spinning characters
 static int spinnerIndex = 0;  // Current index of the spinner character
 
-unsigned long startTime = 0; 
-unsigned long currentTime = 0; 
-unsigned long vibrationStart=0; 
+unsigned long startTime_CS = 0;
+unsigned long startTime_US = 0;
+unsigned long currentTime = 0;
+unsigned long vibrationStart = 0;
 
-const int vibration = 9;    
-const int elektricitet  = 10;       
-
-int ITI[] = {8, 12, 16, 20, 24, 28, 32};
+int ITI[] = {17,17,38,25,17,31,17,16,26,30,32,17,19,16,21,18,17,20,22,16,19,30,23,20,29,21,24,31,17,16};
 int numITIValues = sizeof(ITI) / sizeof(ITI[0]); // Number of ITI values in the array
 
-const int duration = 4000; // 4 sekunder vibration
-const int US = 2000; // 2 sekunders US 
-const int CS= 2000; // 2 sekudner CS 
-//int remainingITI = ITI - ISI - US ; 
+const int vibrationPin = 9;
+const int elektricitetPin = 10;
 
- 
-const int antalTrial = 10;    
-int currentTrial = 0 ;  
+int interTrialInterval_CS = 16000;  // 16 seconds between trials
+int interTrialInterval_US = 16000;  // 16 seconds between trials
+
+const int vibrationDuration = 4000;  // 4 seconds of vibration
+const int unconditionedStimulusDuration = 2000;  // 2 seconds of unconditioned stimulus (US)
+const int remainingITI = 3000;  // Time from US offset to conditioned stimulus (CS) onset to ensure constant ITI
+
+const int numberOfTrials = 30;
+int currentTrial_CS = 0;
+int currentTrial_US = 0;
 
 bool isTrialStarted = false;
-bool isElektricitetActivated = false;
-bool hasShutVib = false; 
+bool isUSActivated = false;
+bool isVibrationActivated = false;
 
 void printEvent(const char* eventName) {
   Serial.print(currentTime);
   Serial.print("\t");
   Serial.print(eventName);
   Serial.print("\t");
-  Serial.println(currentTrial);
+  Serial.println(currentTrial_CS);
 }
 
-void startTrial() {
-  if (!isTrialStarted) {
-    isTrialStarted = true;
-    printEvent("CS on");
-    digitalWrite(vibration, HIGH);
-    vibrationStart =millis(); 
+void activateVibration() {
+  if (!isVibrationActivated) {
+    printEvent("CS On");
+    isVibrationActivated = true;
+    digitalWrite(vibrationPin, HIGH);
+    vibrationStart = millis();
   }
 }
 
-void activateElektricitet() {
-  if (isTrialStarted && !isElektricitetActivated) {
-    isElektricitetActivated = true;
-    printEvent("US on");
-    digitalWrite(elektricitet, HIGH);
+void activateUS() {
+  if (!isUSActivated) {
+    isUSActivated = true;
+    printEvent("US On");
+    digitalWrite(elektricitetPin, HIGH);
   }
 }
 
-void endTrial() {
-  if (isTrialStarted) {
-    isTrialStarted = false;
-    isElektricitetActivated = false;
-    printEvent("US off");
-    digitalWrite(elektricitet, LOW);
-   // ITI = remainingITI ; 
-    startTime = currentTime;
-    currentTrial++; 
+void endVibration() {
+  if (isVibrationActivated) {
+    isVibrationActivated = false;
+    printEvent("CS Off");
+    digitalWrite(vibrationPin, LOW);
     int randomIndex = random(numITIValues); // Generate a random index for ITI array
-    int randomITI = ITI[randomIndex] * 1000; // Convert to milliseconds
-   
+    interTrialInterval_CS = ITI[randomIndex] * 1000; // Convert to milliseconds
+    startTime_CS = currentTime;
+    currentTrial_CS++;
   }
 }
-void shutVib() {
-  if (!hasShutVib) {
-    hasShutVib = true;
-    printEvent("CS off");
-    digitalWrite(vibration, LOW);
-    int randomIndex = random(numITIValues); // Generate a random index for ITI array
-    int randomITI = ITI[randomIndex] * 1000; // Convert to milliseconds
 
+void endUS() {
+  if (isUSActivated) {
+    isUSActivated = false;
+    printEvent("US Off");
+    digitalWrite(elektricitetPin, LOW);
+    int randomIndex = random(numITIValues); // Generate a random index for ITI array
+    interTrialInterval_US = ITI[randomIndex] * 1000; // Convert to milliseconds
+    startTime_US = currentTime;
+    currentTrial_US++;
   }
 }
+
 void setup() {
   Serial.begin(9600);
   Serial.println();
   Serial.println("Please send a character to start the sketch");
+
+  // Wait for input before starting the sketch
   while (Serial.available() == 0) {
     Serial.print(spinner[spinnerIndex]);  // Print the spinner character
     spinnerIndex = (spinnerIndex + 1) % sizeof(spinner);  // Update the spinner index
     delay(100);  // Delay between each spinner character update
   }
+
+  // Empty the read buffer
   while (Serial.available() > 0) {
-    Serial.read(); // Empty the read buffer
+    Serial.read();
   }
 
-  pinMode(vibration, OUTPUT);
-  pinMode(elektricitet, OUTPUT);
+  //set random seed
+  randomSeed(analogRead(A0));
+
+  int randomIndex = random(numITIValues); // Generate a random index for ITI array
+  interTrialInterval_CS = ITI[randomIndex] * 1000; // Convert to milliseconds
+  randomIndex = random(numITIValues); // Generate a random index for ITI array
+  interTrialInterval_US = ITI[randomIndex] * 1000; // Convert to milliseconds
+
+  pinMode(vibrationPin, OUTPUT);
+  pinMode(elektricitetPin, OUTPUT);
   Serial.println("");
   Serial.print("Time");
   Serial.print("\t");
   Serial.print("Event");
   Serial.print("\t");
   Serial.println("Trial");
-  startTime = millis();
+  startTime_CS = millis();
+  startTime_US = millis();
   currentTime = millis();
-  printEvent("start");
-
+  printEvent("Start");
 }
 
 void loop() {
   currentTime = millis();
 
-  if(currentTrial < antalTrial){
+  //Trial triggering event for CS
+  if (currentTrial_CS < numberOfTrials) {
 
-    if (currentTime > (startTime + ITI)) {
-      startTrial();
+    if (currentTime > (startTime_CS + interTrialInterval_CS)) {
+      activateVibration();
     }
-    
-    if (currentTime > (startTime + ITI + duration ) ) {
-       
-      shutVib() ;
-      
+    if (currentTime > (startTime_CS + interTrialInterval_CS + vibrationDuration)) {
+      endVibration();
     }
-  
+
   }
-  if (currentTrial < antalTrial)
-  if (currentTime > (startTime + ITI + duration)){
-      activateElektricitet();
+
+  //Trial triggering event for US
+  if (currentTrial_US < numberOfTrials) {
+
+    if (currentTime > (startTime_US + interTrialInterval_US)) {
+      activateUS();
     }
-    if (currentTime > startTime + ITI + duration + US){
-      endTrial();
+    if (currentTime > (startTime_US + interTrialInterval_US + unconditionedStimulusDuration)) {
+      endUS();
     }
+
+  }
+
 
 }
