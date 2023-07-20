@@ -9,7 +9,7 @@ unsigned long startTime_US = 0;
 unsigned long currentTime = 0;
 unsigned long vibrationStart = 0;
 
-int ITI[] = {8, 12, 16, 20, 24, 28, 32};
+int ITI[] = {17,17,38,25,17,31,17,16,26,30,32,17,19,16,21,18,17,20,22,16,19,30,23,20,29,21,24,31,17,16};
 int numITIValues = sizeof(ITI) / sizeof(ITI[0]); // Number of ITI values in the array
 
 const int vibrationPin = 9;
@@ -22,7 +22,7 @@ const int vibrationDuration = 4000;  // 4 seconds of vibration
 const int unconditionedStimulusDuration = 2000;  // 2 seconds of unconditioned stimulus (US)
 const int remainingITI = 3000;  // Time from US offset to conditioned stimulus (CS) onset to ensure constant ITI
 
-const int numberOfTrials = 14;
+const int numberOfTrials = 30;
 int currentTrial_CS = 0;
 int currentTrial_US = 0;
 
