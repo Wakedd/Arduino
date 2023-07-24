@@ -22,7 +22,8 @@ const int vibrationDuration = 4000;  // 4 seconds of vibration
 const int unconditionedStimulusDuration = 2000;  // 2 seconds of unconditioned stimulus (US)
 const int remainingITI = 3000;  // Time from US offset to conditioned stimulus (CS) onset to ensure constant ITI
 
-const int numberOfTrials = 30;
+const int numberOfTrials = 15;
+const int numberOfTrials1 = 30;
 int currentTrial_CS = 0;
 int currentTrial_US = 0;
 
@@ -76,6 +77,13 @@ void endUS() {
     interTrialInterval_US = ITI[randomIndex] * 1000; // Convert to milliseconds
     startTime_US = currentTime;
     currentTrial_US++;
+  }
+  }
+  void endUS1() {
+  if (isUSActivated) {
+    isUSActivated = false;
+    printEvent("US Off");
+    digitalWrite(elektricitetPin, LOW);
   }
 }
 
@@ -142,6 +150,20 @@ void loop() {
     }
 
   }
+  if (currentTrial_CS < numberOfTrials1 && currentTrial_US >= numberOfTrials) {
+
+    if (currentTime > (startTime_CS + interTrialInterval_CS)) {
+      activateVibration();
+    }
+    if (currentTime > (startTime_CS + interTrialInterval_CS+unconditionedStimulusDuration )){
+      activateUS() ; 
+    }
 
 
+    if (currentTime > (startTime_CS + interTrialInterval_CS + vibrationDuration)) {
+      endUS1(); 
+      endVibration();
+    }
+
+}
 }
