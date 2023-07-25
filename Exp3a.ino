@@ -150,20 +150,7 @@ void loop() {
     }
 
   }
-  if (currentTrial_CS < numberOfTrials1 && currentTrial_US >= numberOfTrials) {
-
-    if (currentTime > (startTime_CS + interTrialInterval_CS)) {
-      activateVibration();
-    }
-    if (currentTime > (startTime_CS + interTrialInterval_CS+unconditionedStimulusDuration )){
-      activateUS() ; 
-    }
-
-
-    if (currentTime > (startTime_CS + interTrialInterval_CS + vibrationDuration)) {
-      endUS1(); 
-      endVibration();
-    }
+  
 
 }
 }
